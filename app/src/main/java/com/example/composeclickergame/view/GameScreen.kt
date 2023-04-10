@@ -62,7 +62,8 @@ fun GameScreen(
                 ) {
                     items(itemDatas) { data ->
                         ListItem(
-                            headlineContent = { Text(text = "${data.name} (${itemCountMap[data.name] ?: 0})") },
+                            leadingContent = { Text(text = "(${itemCountMap[data.name] ?: 0})") },
+                            headlineContent = { Text(text = data.name) },
                             trailingContent = { Text(text = "${data.rate}/s") },
                         )
                     }
