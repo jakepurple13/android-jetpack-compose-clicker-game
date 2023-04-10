@@ -10,5 +10,6 @@ class ItemDataRepository @Inject constructor() {
         ItemData("Farm", 10, 100),
         ItemData("Mine", 100, 1000),
         ItemData("Factory", 1000, 10000),
+        ItemData("City", 10000, 100000),
     )
 }

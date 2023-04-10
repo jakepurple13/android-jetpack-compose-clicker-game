@@ -1,34 +1,44 @@
 package com.example.composeclickergame.view
 
+import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetState
-import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.composeclickergame.model.ItemData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
-@Preview
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GameScreen(
     parentScope: CoroutineScope = rememberCoroutineScope(),
-    storeBottomSheetState: ModalBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden),
     score: Int = 0,
     rate: Int = 0,
     onIncrementButtonClicked: () -> Unit = {},
+    itemDatas: List<ItemData>,
+    itemCountMap: Map<String, Int>,
+    onStoreItemPurchased: (ItemData) -> Unit
 ) {
-    Scaffold { contentPadding ->
+    val storeBottomSheetState = rememberBottomSheetScaffoldState()
+    BottomSheetScaffold(
+        sheetContent = {
+            StoreBottomSheet(
+                itemDatas = itemDatas,
+                itemCountMap = itemCountMap,
+                onStoreItemPurchased = onStoreItemPurchased,
+            )
+        },
+        scaffoldState = storeBottomSheetState
+    ) { contentPadding ->
         Box(modifier = Modifier.padding(contentPadding)) {
             Column(
                 modifier = Modifier.fillMaxWidth(),
@@ -44,6 +54,18 @@ fun GameScreen(
                         text = "$rate/s",
                         style = MaterialTheme.typography.headlineSmall,
                     )
+                }
+                LazyColumn(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    items(itemDatas) { data ->
+                        ListItem(
+                            headlineContent = { Text(text = "${data.name} (${itemCountMap[data.name] ?: 0})") },
+                            trailingContent = { Text(text = "${data.rate}/s") },
+                        )
+                    }
                 }
                 Column(
                     modifier = Modifier.weight(1f),
@@ -66,7 +88,7 @@ fun GameScreen(
                         }
                     }
                     StoreButton(
-                        onClick = { parentScope.launch { storeBottomSheetState.show() } },
+                        onClick = { parentScope.launch { storeBottomSheetState.bottomSheetState.expand() } },
                     )
                 }
             }
@@ -77,7 +99,7 @@ fun GameScreen(
 @Composable
 private fun ScoreText(score: Int) {
     Text(
-        text = score.toString(),
+        text = "$" + animateIntAsState(score).value.toString(),
         style = MaterialTheme.typography.displayMedium,
     )
 }
